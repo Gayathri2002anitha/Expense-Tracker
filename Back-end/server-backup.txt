@@ -1,0 +1,285 @@
+require("dotenv").config();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User");
+
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+
+const app = express();
+const PORT = 5000;
+
+app.use(cors());
+app.use(express.json());
+
+// MongoDB connection
+mongoose.connect("mongodb://127.0.0.1:27017/expenseTracker")
+    .then(() => console.log("MongoDB Connected Successfully!"))
+    .catch((error) => console.log("MongoDB Error:", error));
+
+// Expense Schema
+const expenseSchema = new mongoose.Schema({
+    amount: {
+        type: Number,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    date: {
+        type: String,
+        required: true
+    }
+});
+
+const Expense = mongoose.model("Expense", expenseSchema);
+
+// Home route
+app.get("/", (req, res) => {
+    res.send("Expense Tracker Backend is Running!");
+});
+
+/* ==============================
+   SIGNUP API
+============================== */
+app.post("/auth/signup", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        if (
+            typeof name !== "string" ||
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !name.trim() ||
+            !email.trim() ||
+            password.length < 8
+        ) {
+            return res.status(400).json({
+                message: "Enter name, valid email and password (minimum 8 characters)."
+            });
+        }
+
+        if (!process.env.JWT_SECRET) {
+            return res.status(500).json({
+                message: "JWT secret is not configured."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const existingUser = await User.findOne({
+            email: normalizedEmail
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                message: "Email already registered. Please login."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const user = await User.create({
+            name: name.trim(),
+            email: normalizedEmail,
+            password: hashedPassword
+        });
+
+        const token = jwt.sign(
+            { userId: user._id.toString() },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        return res.status(201).json({
+            message: "Signup successful!",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({
+                message: "Email already registered. Please login."
+            });
+        }
+
+        console.error("Signup error:", error.message);
+
+        return res.status(500).json({
+            message: "Signup failed. Please try again."
+        });
+    }
+});
+
+
+/* ==============================
+   LOGIN API
+============================== */
+app.post("/auth/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !email.trim() ||
+            !password
+        ) {
+            return res.status(400).json({
+                message: "Email and password are required."
+            });
+        }
+
+        if (!process.env.JWT_SECRET) {
+            return res.status(500).json({
+                message: "JWT secret is not configured."
+            });
+        }
+
+        const user = await User.findOne({
+            email: email.trim().toLowerCase()
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                message: "Invalid email or password."
+            });
+        }
+
+        const passwordMatches = await bcrypt.compare(
+            password,
+            user.password
+        );
+
+        if (!passwordMatches) {
+            return res.status(401).json({
+                message: "Invalid email or password."
+            });
+        }
+
+        const token = jwt.sign(
+            { userId: user._id.toString() },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        return res.json({
+            message: "Login successful!",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        console.error("Login error:", error.message);
+
+        return res.status(500).json({
+            message: "Login failed. Please try again."
+        });
+    }
+});
+
+
+// Get all expenses
+app.get("/expenses", async (req, res) => {
+    try {
+        const expenses = await Expense.find();
+        res.json(expenses);
+    } catch (error) {
+        res.status(500).json({ message: "Unable to fetch expenses" });
+    }
+});
+
+// Add expense
+app.post("/expenses", async (req, res) => {
+    try {
+        const expense = await Expense.create({
+            amount: Number(req.body.amount),
+            category: req.body.category,
+            description: req.body.description,
+            date: req.body.date
+        });
+
+        res.status(201).json(expense);
+    } catch (error) {
+        res.status(400).json({ message: "Unable to add expense", error: error.message });
+    }
+});
+
+// Edit expense
+app.put("/expenses/:id", async (req, res) => {
+    try {
+        const expense = await Expense.findByIdAndUpdate(
+            req.params.id,
+            {
+                amount: Number(req.body.amount),
+                category: req.body.category,
+                description: req.body.description,
+                date: req.body.date
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!expense) {
+            return res.status(404).json({ message: "Expense not found" });
+        }
+
+        res.json(expense);
+    } catch (error) {
+        res.status(400).json({ message: "Unable to update expense", error: error.message });
+    }
+});
+
+// Delete expense
+
+app.delete("/expenses/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        console.log("Delete request ID:", id);
+
+        const expense = await Expense.findByIdAndDelete(id);
+
+        if (!expense) {
+            console.log("Expense not found in MongoDB");
+
+            return res.status(404).json({
+                message: "Expense not found"
+            });
+        }
+
+        console.log("Deleted expense:", expense);
+
+        res.json({
+            message: "Expense deleted successfully",
+            deletedExpense: expense
+        });
+
+    } catch (error) {
+        console.log("Delete Error:", error.message);
+
+        res.status(400).json({
+            message: "Unable to delete expense",
+            error: error.message
+        });
+    }
+});
+
+// Start server after MongoDB connects
+mongoose.connection.once("open", () => {
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+    });
+});

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#17152b">
+    <title>Expense Tracker | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="brand">
+            <span class="brand-logo">₹</span>
+            <span>Expense<span class="brand-light">Tracker</span></span>
+        </a>
+        <p class="menu-label">WORKSPACE</p>
+        <nav class="side-nav">
+            <a href="index.html" class="nav-link active">
+                <span>▦</span> Dashboard
+            </a>
+            <a href="#recentExpenses" class="nav-link">
+                <span>☷</span> Transactions
+            </a>
+            <a href="#analytics" class="nav-link">
+                <span>◔</span> Analytics
+            </a>
+            <a href="profile.html" class="nav-link">
+                <span>♙</span> My Profile
+            </a>
+        </nav>
+        <div class="sidebar-bottom">
+            <div class="saving-icon">✦</div>
+            <h3>Save more, worry less.</h3>
+            <p>Small savings today create a better tomorrow.</p>
+        </div>
+        <a href="#" class="nav-link logout-link" id="logoutLink">
+            <span>↪</span> Logout
+        </a>
+    </aside>
+    <!-- Main Dashboard -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">YOUR PERSONAL FINANCE SPACE</p>
+                <h1>Dashboard <span class="wave">✦</span></h1>
+                <p class="subheading">
+                    Welcome back! Here's your financial overview.
+                </p>
+            </div>
+            <div class="topbar-right">
+                <div class="today-pill">
+                    <span>◷</span>
+                    <span id="todayDate">Today</span>
+                </div>
+                <a href="profile.html" class="profile-avatar"
+                   aria-label="Open profile">G</a>
+            </div>
+        </header>
+        <!-- Summary Cards -->
+        <section class="summary-cards">
+            <article class="summary-card total-card">
+                <div class="card-top">
+                    <span class="metric-icon">₹</span>
+                    <span class="metric-caption">ALL TIME</span>
+                </div>
+                <p class="metric-label">Total Expenses</p>
+                <h2 id="totalExpense">₹0</h2>
+                <p class="metric-foot">Your recorded spending</p>
+                <span class="decor-circle"></span>
+            </article>
+            <article class="summary-card month-card">
+                <div class="card-top">
+                    <span class="metric-icon">▦</span>
+                    <span class="metric-caption">THIS MONTH</span>
+                </div>
+                <p class="metric-label">Monthly Expense</p>
+                <h2 id="monthlyExpense">₹0</h2>
+                <p class="metric-foot">Keep your budget in check</p>
+            </article>
+            <article class="summary-card food-card">
+                <div class="card-top">
+                    <span class="metric-icon">♨</span>
+                    <span class="metric-caption">CATEGORY</span>
+                </div>
+                <p class="metric-label">Food Expense</p>
+                <h2 id="foodExpense">₹0</h2>
+                <p class="metric-foot">Your food spending</p>
+            </article>
+            <article class="summary-card travel-card">
+                <div class="card-top">
+                    <span class="metric-icon">➤</span>
+                    <span class="metric-caption">CATEGORY</span>
+                </div>
+                <p class="metric-label">Travel Expense</p>
+                <h2 id="travelExpense">₹0</h2>
+                <p class="metric-foot">Your travel spending</p>
+            </article>
+        </section>
+<!-- Analytics Charts -->
+    <section id="analytics" class="charts-grid">
+        <!-- Monthly Bar Chart -->
+         <article class="panel chart-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Expense Overview</h2>
+                     <p>Track your monthly spending pattern</p>
+                </div>
+                <span class="panel-icon">▥</span>
+            </div>
+        <div class="chart-container">
+            <canvas id="monthlyExpenseChart"></canvas>
+        </div>
+    </article>
+    <!-- Category Pie Chart -->
+    <article class="panel chart-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Spending Breakdown</h2>
+                <p>Explore expenses by category</p>
+            </div>
+            <span class="panel-icon">◉</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="categoryExpenseChart"></canvas>
+        </div>
+    </article>
+</section>
+        <!-- Add Expense Form -->
+        <section class="panel form-panel">
+            <div class="panel-heading form-heading">
+                <div>
+                    <span class="section-kicker">STAY IN CONTROL</span>
+                    <h2>Add New Expense</h2>
+                    <p>Record your spending and keep everything organised.</p>
+                </div>
+                <span class="form-decoration">＋</span>
+            </div>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <label for="amount">Amount (₹)</label>
+                    <div class="input-wrap">
+                        <span class="input-symbol">₹</span>
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            placeholder="0.00"
+                            min="0.01"
+                            step="0.01"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Choose category</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="Education">Education</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input
+                        type="text"
+                        id="description"
+                        name="description"
+                        placeholder="What did you spend on?"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="date">Expense Date</label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                    >
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">
+                        ＋ Add Expense
+                    </button>
+                </div>
+            </form>
+        </section>
+        <!-- Transactions -->
+        <section class="panel transactions-panel" id="recentExpenses">
+            <div class="panel-heading transactions-heading">
+                <div>
+                    <h2>Recent Transactions</h2>
+                    <p>Manage and review your expense history.</p>
+                </div>
+                <span class="records-tag">EXPENSE RECORDS</span>
+            </div>
+            <!-- Search and Filters -->
+            <div class="filters">
+                <div class="form-group search-group">
+                    <label for="search">Search</label>
+                    <div class="search-wrap">
+                        <span>⌕</span>
+                        <input
+                            type="search"
+                            id="search"
+                            placeholder="Search expenses..."
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="filterCategory">Category</label>
+                    <select id="filterCategory">
+                        <option value="">All Categories</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                        <option value="shopping">Shopping</option>
+                        <option value="Education">Education</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filterDate">Date</label>
+                    <input type="date" id="filterDate">
+                </div>
+            </div>
+            <!-- Expense Table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>CATEGORY</th>
+                            <th>DESCRIPTION</th>
+                            <th>AMOUNT</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseList">
+                        <!-- Expense rows are added by script.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Footer -->
+        <footer>
+            <span>
+                © <span id="footerYear"></span> Expense Tracker
+            </span>
+            <span>Made for smarter money habits ♡</span>
+        </footer>
+    </main>
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

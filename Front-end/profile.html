@@ -1,0 +1,538 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Expense Tracker</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: #f8fafc;
+            background:
+                radial-gradient(circle at top left, #263c70 0, transparent 35%),
+                radial-gradient(circle at bottom right, #164e63 0, transparent 35%),
+                #0b1120;
+        }
+
+        /* Navbar */
+        .navbar {
+            min-height: 76px;
+            padding: 18px 7%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.82);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: 800;
+            color: #67e8f9;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #67e8f9;
+        }
+
+        /* Main section */
+        .profile-container {
+            width: min(900px, 90%);
+            margin: 55px auto;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .page-heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-heading h1 {
+            font-size: clamp(28px, 4vw, 38px);
+            margin-bottom: 10px;
+        }
+
+        .page-heading h1 span {
+            color: #67e8f9;
+        }
+
+        .page-heading p {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        /* Profile card */
+        .profile-card {
+            overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            background: rgba(255, 255, 255, 0.055);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+        }
+
+        .profile-header {
+            padding: 38px 25px;
+            text-align: center;
+            background: linear-gradient(
+                135deg,
+                rgba(34, 211, 238, 0.15),
+                rgba(99, 102, 241, 0.16)
+            );
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-avatar {
+            width: 105px;
+            height: 105px;
+            margin: 0 auto 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22d3ee, #818cf8);
+            color: #0f172a;
+            font-size: 42px;
+            font-weight: 800;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 35px rgba(34, 211, 238, 0.2);
+        }
+
+        .profile-header h2 {
+            font-size: 27px;
+            margin-bottom: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-header p {
+            color: #cbd5e1;
+            overflow-wrap: anywhere;
+        }
+
+        .account-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 18px;
+            padding: 8px 14px;
+            border-radius: 30px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            color: #86efac;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        /* Details */
+        .profile-content {
+            padding: 32px;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            font-size: 19px;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .detail-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            min-width: 0;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(103, 232, 249, 0.5);
+        }
+
+        .detail-icon {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(34, 211, 238, 0.12);
+            font-size: 23px;
+        }
+
+        .detail-info {
+            min-width: 0;
+        }
+
+        .detail-info small {
+            display: block;
+            margin-bottom: 7px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .detail-info strong {
+            display: block;
+            font-size: 15px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        /* Buttons */
+        .profile-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-height: 49px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 13px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .dashboard-btn {
+            color: #082f49;
+            background: linear-gradient(135deg, #67e8f9, #a5f3fc);
+            border: none;
+        }
+
+        .logout-btn {
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .dashboard-btn:hover {
+            box-shadow: 0 10px 25px rgba(34, 211, 238, 0.2);
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .message {
+            display: none;
+            margin-top: 20px;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .message.error {
+            display: block;
+            color: #fecaca;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .message.info {
+            display: block;
+            color: #bae6fd;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px 15px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 16px 5%;
+            }
+
+            .logo {
+                font-size: 19px;
+            }
+
+            .nav-right {
+                gap: 12px;
+            }
+
+            .nav-link {
+                font-size: 13px;
+            }
+
+            .profile-container {
+                margin: 35px auto;
+            }
+
+            .profile-content {
+                padding: 22px 17px;
+            }
+
+            .profile-details {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+            }
+
+            .profile-header h2 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">💰 Expense Tracker</div>
+
+        <div class="nav-right">
+            <a class="nav-link" href="index.html">Dashboard</a>
+            <a class="nav-link" href="profile.html">My Profile</a>
+        </div>
+    </nav>
+
+    <main class="profile-container">
+
+        <div class="page-heading">
+            <h1>My <span>Profile</span></h1>
+            <p>Manage your account and personal information</p>
+        </div>
+
+        <section class="profile-card">
+
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+
+                <h2 id="profileName">Loading profile...</h2>
+                <p id="profileEmail">Please wait while we fetch your details</p>
+
+                <div class="account-status">
+                    <span class="status-dot"></span>
+                    <span>Authenticated Account</span>
+                </div>
+            </div>
+
+            <div class="profile-content">
+                <h3 class="section-title">👤 Personal Information</h3>
+
+                <div class="profile-details">
+                    <div class="detail-card">
+                        <div class="detail-icon">🧑</div>
+                        <div class="detail-info">
+                            <small>Full Name</small>
+                            <strong id="detailName">Loading...</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <div class="detail-icon">📧</div>
+                        <div class="detail-info">
+                            <small>Email Address</small>
+                            <strong id="detailEmail">Loading...</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <div class="detail-icon">🔐</div>
+                        <div class="detail-info">
+                            <small>Authentication</small>
+                            <strong>JWT Secured</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <div class="detail-icon">🛡️</div>
+                        <div class="detail-info">
+                            <small>Account Status</small>
+                            <strong id="detailStatus">Verifying...</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profileMessage" class="message" role="status"></div>
+
+                <div class="profile-actions">
+                    <a href="index.html" class="action-btn dashboard-btn">
+                        ← Back to Dashboard
+                    </a>
+
+                    <button type="button" id="logoutBtn"
+                            class="action-btn logout-btn">
+                        ↪ Logout
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="footer">
+        © 2026 Expense Tracker | Manage your money smartly.
+    </footer>
+
+    <script>
+        const API_URL = "http://localhost:5000";
+
+        const token = localStorage.getItem("token");
+
+        const profileName = document.getElementById("profileName");
+        const profileEmail = document.getElementById("profileEmail");
+        const profileAvatar = document.getElementById("profileAvatar");
+        const detailName = document.getElementById("detailName");
+        const detailEmail = document.getElementById("detailEmail");
+        const detailStatus = document.getElementById("detailStatus");
+        const profileMessage = document.getElementById("profileMessage");
+        const logoutBtn = document.getElementById("logoutBtn");
+
+        function showMessage(message, type = "error") {
+            profileMessage.textContent = message;
+            profileMessage.className = "message " + type;
+        }
+
+        function clearSession() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+        }
+
+        async function loadProfile() {
+            if (!token) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.status === 401 || response.status === 403) {
+                    clearSession();
+                    window.location.replace("login.html");
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Unable to load profile.");
+                }
+
+                // Supports either { user: {...} } or a direct user object.
+                const user = data.user || data;
+
+                const name = user.name || "User";
+                const email = user.email || "Email not available";
+
+                profileName.textContent = name;
+                profileEmail.textContent = email;
+                profileAvatar.textContent = name.trim().charAt(0).toUpperCase();
+                detailName.textContent = name;
+                detailEmail.textContent = email;
+                detailStatus.textContent = "Active";
+
+                // Keep local profile information in sync if available.
+                localStorage.setItem("user", JSON.stringify({
+                    name: name,
+                    email: email
+                }));
+
+            } catch (error) {
+                console.error("Profile loading error:", error);
+                profileName.textContent = "Unable to load profile";
+                profileEmail.textContent = "Check your backend connection";
+                detailName.textContent = "Not available";
+                detailEmail.textContent = "Not available";
+                detailStatus.textContent = "Unable to verify";
+
+                showMessage(
+                    error.message ||
+                    "Could not connect to the server. Make sure your backend is running."
+                );
+            }
+        }
+
+        logoutBtn.addEventListener("click", function () {
+            const confirmed = window.confirm("Are you sure you want to logout?");
+
+            if (!confirmed) return;
+
+            clearSession();
+            window.location.replace("login.html");
+        });
+
+        loadProfile();
+    </script>
+
+</body>
+</html>
